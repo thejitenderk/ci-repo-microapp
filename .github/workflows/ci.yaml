@@ -7,17 +7,34 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  ACR_NAME: acrtodoappsiddharth1
+  IMAGE_NAME: myapp
+  IMAGE_TAG: latest
+
 jobs:
-  az_login:
+  docker-build-push:
     runs-on: ubuntu-latest
     environment: Dev
+
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Azure Login
-        uses: Azure/login@v3
+        uses: Azure/login@v2
         with:
-          # ClientId of the Azure Service principal created.
           client-id: ${{ secrets.AZURE_CLIENTID }}
-          # TenantId of the Azure Service principal created.
           tenant-id: ${{ secrets.AZURE_TENANTID }}
-          # Azure subscriptionId
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTIONID }}
+
+      - name: Login to ACR
+        run: az acr login --name $ACR_NAME
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
