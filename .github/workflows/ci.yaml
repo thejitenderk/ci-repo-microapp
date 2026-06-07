@@ -10,6 +10,7 @@ permissions:
 jobs:
   az_login:
     runs-on: ubuntu-latest
+    environment: Dev
     steps:
       - name: Azure Login
         uses: Azure/login@v3
